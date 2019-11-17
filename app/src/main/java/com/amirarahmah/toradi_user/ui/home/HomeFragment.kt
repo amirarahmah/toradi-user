@@ -1,10 +1,13 @@
 package com.amirarahmah.toradi_user.ui.home
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,13 +15,26 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.amirarahmah.toradi_user.R
 import com.amirarahmah.toradi_user.util.PermissionUtils
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.*
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.maps.android.PolyUtil
+import kotlinx.android.synthetic.main.bottom_sheet_main.*
+import kotlinx.android.synthetic.main.bottom_sheet_order.*
+import kotlinx.android.synthetic.main.fragment_home.*
+import org.json.JSONObject
+import java.util.*
+
 
 class HomeFragment : Fragment(), OnMapReadyCallback {
 
@@ -29,19 +45,23 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private var latitude: Double? = 0.0
     private var longitude: Double? = 0.0
 
-    private var lat_awal: Double? = 0.0
-    private var lng_awal: Double? = 0.0
-    private var alamat_awal = ""
+    private var pickup_lat: Double? = 0.0
+    private var pickup_lng: Double? = 0.0
+    private var pickup_address = ""
     private var keterangan_awal = ""
 
-    private var lat_tujuan: Double? = 0.0
-    private var lng_tujuan: Double? = 0.0
-    private var alamat_tujuan = ""
+    private var destination_lat: Double? = 0.0
+    private var destination_lng: Double? = 0.0
+    private var destination_address = ""
     private var keterangan_tujuan = ""
 
     private var mFusedLocationProviderClient: FusedLocationProviderClient? = null
     private var mLocationCallback: LocationCallback? = null
     private var mLocationRequest: LocationRequest? = null
+
+    private var polyline: Polyline? = null
+    private var marker_pickup: Marker? = null
+    private var marker_destination: Marker? = null
     /*Maps variable*/
 
     private lateinit var homeViewModel: HomeViewModel
@@ -63,18 +83,34 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             childFragmentManager.findFragmentById(R.id.location_map) as SupportMapFragment
 
         mapFragment.getMapAsync(this)
+
+        container_search_destination.setOnClickListener {
+            val searchLocationFragment = SearchLocationFragment()
+            searchLocationFragment.setTargetFragment(this, 2)
+            searchLocationFragment.show(
+                activity!!.supportFragmentManager,
+                searchLocationFragment.tag
+            )
+        }
     }
 
     override fun onMapReady(googleMap: GoogleMap?) {
         mMap = googleMap
 
-        if (ActivityCompat.checkSelfPermission(activity?.applicationContext as Context,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-            && ActivityCompat.checkSelfPermission(activity?.applicationContext as Context,
-                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(
+                activity?.applicationContext as Context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+            && ActivityCompat.checkSelfPermission(
+                activity?.applicationContext as Context,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
 
-            PermissionUtils.requestPermission(activity as AppCompatActivity, LOCATION_PERMISSION_REQUEST_CODE,
-                Manifest.permission.ACCESS_FINE_LOCATION, true)
+            PermissionUtils.requestPermission(
+                activity as AppCompatActivity, LOCATION_PERMISSION_REQUEST_CODE,
+                Manifest.permission.ACCESS_FINE_LOCATION, true
+            )
         }
 
         mMap?.isMyLocationEnabled = true
@@ -104,9 +140,9 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     return
                 }
                 val location = locationResult.lastLocation
-                val cameraUpdate = CameraUpdateFactory
-                    .newLatLngZoom(LatLng(location.latitude, location.longitude), 17f)
-                mMap?.moveCamera(cameraUpdate)
+                latitude = location.latitude
+                longitude = location.longitude
+                moveCamera(latitude!!, longitude!!)
                 mFusedLocationProviderClient!!.removeLocationUpdates(mLocationCallback!!)
             }
         }
@@ -118,12 +154,162 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     latitude = location.latitude
                     longitude = location.longitude
                 } else {
-                    mFusedLocationProviderClient!!.requestLocationUpdates(mLocationRequest, mLocationCallback!!, null)
+                    mFusedLocationProviderClient!!.requestLocationUpdates(
+                        mLocationRequest,
+                        mLocationCallback!!,
+                        null
+                    )
                 }
 
-                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(LatLng(latitude!!, longitude!!), 17f)
-                mMap?.moveCamera(cameraUpdate)
+                moveCamera(latitude!!, longitude!!)
             }
+    }
+
+
+    private fun moveCamera(latitude: Double, longitude: Double) {
+        val cameraUpdate = CameraUpdateFactory
+            .newLatLngZoom(LatLng(latitude, longitude), 17f)
+        mMap?.moveCamera(cameraUpdate)
+        getAddress(latitude, longitude)
+    }
+
+
+    private fun getAddress(latitude: Double, longitude: Double) {
+        try {
+            val geocoder = Geocoder(context, Locale.getDefault())
+            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+            if (addresses.isEmpty()) {
+                pickup_address = ""
+            } else {
+                pickup_address = "" + addresses[0].getAddressLine(0)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 2 && resultCode == Activity.RESULT_OK) {
+            //get address, latitude and longitude from SearchLocationFragment
+            val bundle = data!!.extras
+            destination_address = bundle!!.getString("address", "")
+            destination_lat = bundle.getDouble("latitude", 0.0)
+            destination_lng = bundle.getDouble("longitude", 0.0)
+
+            if (pickup_lat == 0.0 || pickup_lng == 0.0) {
+                pickup_lat = latitude
+                pickup_lng = longitude
+            }
+            addPolylinesToMaps(pickup_lat!!, pickup_lng!!, destination_lat!!, destination_lng!!)
+            showOrderSummary()
+
+        }
+    }
+
+    private fun showOrderSummary() {
+        bottom_sheet_main.visibility = View.GONE
+        val bottomSheetBehavior = BottomSheetBehavior.from(bottom_sheet_order)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        bottomSheetBehavior.skipCollapsed = true
+        bottomSheetBehavior.peekHeight = bottom_sheet_order.height
+        tv_pickup.text = pickup_address
+        tv_destination.text = destination_address
+    }
+
+    fun addPolylinesToMaps(
+        pickupLat: Double,
+        pickupLng: Double,
+        destinationLat: Double,
+        destinationLng: Double
+    ) {
+        if (polyline != null) {
+            polyline?.remove()
+        }
+
+        val path: MutableList<List<LatLng>> = ArrayList()
+
+        val origin = "$pickupLat,$pickupLng"
+        val destination = "$destinationLat,$destinationLng"
+
+        Log.d("OjekActivity", "origin: $origin destination: $destination")
+
+        val apiKey = resources.getString(R.string.google_maps_key2)
+
+        val urlDirections =
+            "https://maps.googleapis.com/maps/api/directions/json?origin=$origin&destination=$destination&key=$apiKey"
+        val directionsRequest = object :
+            StringRequest(Method.GET, urlDirections, Response.Listener<String> { response ->
+                val jsonResponse = JSONObject(response)
+                // Get routes
+                val routes = jsonResponse.getJSONArray("routes")
+                val legs = routes.getJSONObject(0).getJSONArray("legs")
+                val steps = legs.getJSONObject(0).getJSONArray("steps")
+
+                for (i in 0 until steps.length()) {
+                    val points =
+                        steps.getJSONObject(i).getJSONObject("polyline").getString("points")
+                    path.add(PolyUtil.decode(points))
+                }
+
+                val lineOptions = PolylineOptions()
+
+                for (i in 0 until path.size) {
+
+                    lineOptions.addAll(path[i])
+                    lineOptions.width(12f)
+                    lineOptions.color(ContextCompat.getColor(context!!, R.color.colorPrimary))
+
+                }
+
+                polyline = mMap?.addPolyline(lineOptions)
+
+                addMarkerToMaps()
+
+            }, Response.ErrorListener {
+            }) {}
+        val requestQueue = Volley.newRequestQueue(context)
+        requestQueue.add(directionsRequest)
+
+    }
+
+    private fun addMarkerToMaps() {
+        //add pickup marker
+        val loc = LatLng(pickup_lat!!, pickup_lng!!)
+        if (marker_pickup != null) {
+            marker_pickup?.remove()
+        }
+
+        var height = 75
+        var width = 75
+        val b = BitmapFactory.decodeResource(resources, R.drawable.ic_pickup)
+        val marker = Bitmap.createScaledBitmap(b, width, height, false)
+        val markerIcon = BitmapDescriptorFactory . fromBitmap (marker)
+
+        marker_pickup = mMap?.addMarker(
+            MarkerOptions()
+                .position(loc)
+                .icon(markerIcon)
+        )
+
+        //add destination marker
+        val loc2 = LatLng(destination_lat!!, destination_lng!!)
+        if (marker_destination != null) {
+            marker_destination?.remove()
+        }
+
+        height = 100
+        width = 100
+        val b2 = BitmapFactory.decodeResource(resources, R.drawable.ic_destination)
+        val marker2 = Bitmap.createScaledBitmap(b2, width, height, false)
+        val markerIcon2 = BitmapDescriptorFactory . fromBitmap (marker2)
+
+        marker_destination = mMap?.addMarker(
+            MarkerOptions()
+                .position(loc2)
+                .icon(markerIcon2)
+        )
     }
 
 

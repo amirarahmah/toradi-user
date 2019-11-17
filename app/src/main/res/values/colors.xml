@@ -2,8 +2,16 @@
 <resources>
     <color name="colorPrimary">#4760F3</color>
     <color name="colorPrimaryDark">#343A61</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorAccent">#4760F3</color>
 
     <color name="white">#ffffff</color>
     <color name="grey">#7f8c8d</color>
+    <color name="background_grey">#E4E4E4</color>
+    <color name="background_search">#EFF1F7</color>
+    <color name="black_dividers">#1f000000</color>
+    <color name="primary_text">#21222A</color>
+    <color name="secondary_text">#616B8F</color>
+    <color name="light_purple">#9CA3BC</color>
+    <color name="red">#ED0D32</color>
+    <color name="yellow">#FCAC12</color>
 </resources>
