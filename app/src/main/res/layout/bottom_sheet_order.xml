@@ -165,7 +165,7 @@
         android:textColor="@color/primary_text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="1 Penumpang" />
+        android:text="1 Penumpang" />
 
     <View
         android:layout_width="match_parent"

@@ -19,8 +19,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.amirarahmah.toradi_user.R
+import com.amirarahmah.toradi_user.data.model.Status
 import com.amirarahmah.toradi_user.util.PermissionUtils
-import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
@@ -64,14 +64,14 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private var marker_destination: Marker? = null
     /*Maps variable*/
 
-    private lateinit var homeViewModel: HomeViewModel
+    private lateinit var viewModel: HomeViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        homeViewModel =
+        viewModel =
             ViewModelProviders.of(this).get(HomeViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_home, container, false)
         return root
@@ -85,12 +85,15 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
 
         container_search_destination.setOnClickListener {
-            val searchLocationFragment = SearchLocationFragment()
-            searchLocationFragment.setTargetFragment(this, 2)
-            searchLocationFragment.show(
-                activity!!.supportFragmentManager,
-                searchLocationFragment.tag
-            )
+            if (latitude != 0.0 && longitude != 0.0) {
+                val searchLocationFragment = SearchLocationFragment
+                    .newInstance(latitude!!, longitude!!, pickup_address, destination_address)
+                searchLocationFragment.setTargetFragment(this, 2)
+                searchLocationFragment.show(
+                    activity!!.supportFragmentManager,
+                    searchLocationFragment.tag
+                )
+            }
         }
     }
 
@@ -194,19 +197,69 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         if (requestCode == 2 && resultCode == Activity.RESULT_OK) {
             //get address, latitude and longitude from SearchLocationFragment
             val bundle = data!!.extras
-            destination_address = bundle!!.getString("address", "")
-            destination_lat = bundle.getDouble("latitude", 0.0)
-            destination_lng = bundle.getDouble("longitude", 0.0)
+            val adddress_type = bundle!!.getInt("address_type", 1)
+            val from = bundle.getInt("from", 1)
+            val address = bundle.getString("address", "")
+
+            Log.d("OjekActivity", "address: $adddress_type")
+
+            if (adddress_type == 1) {
+                destination_address = address
+            } else {
+                pickup_address = address
+            }
 
             if (pickup_lat == 0.0 || pickup_lng == 0.0) {
                 pickup_lat = latitude
                 pickup_lng = longitude
             }
-            addPolylinesToMaps(pickup_lat!!, pickup_lng!!, destination_lat!!, destination_lng!!)
-            showOrderSummary()
+
+            if (from == 1) { // address from place autocomplete
+                getLatLngFromAddress(address, adddress_type)
+            } else { // address from maps picker
+                destination_lat = bundle.getDouble("latitude", 0.0)
+                destination_lng = bundle.getDouble("longitude", 0.0)
+
+                addPolylinesToMaps(pickup_lat!!, pickup_lng!!, destination_lat!!, destination_lng!!)
+                showOrderSummary()
+            }
 
         }
     }
+
+
+    private fun getLatLngFromAddress(address: String, type: Int) {
+        viewModel.getLatLng(address)
+
+        viewModel.geocodeResult.observe(this, androidx.lifecycle.Observer {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    if (it.data != null) {
+                        if (type == 1) { // destination address
+                            destination_lat = it.data.location.lat
+                            destination_lng = it.data.location.lng
+
+                            addPolylinesToMaps(pickup_lat!!, pickup_lng!!, destination_lat!!, destination_lng!!)
+                            showOrderSummary()
+
+                        } else { // pickup address
+                            pickup_lat = it.data.location.lat
+                            pickup_lng = it.data.location.lng
+
+                            if(destination_lat != 0.0 && destination_lng != 0.0){
+                                addPolylinesToMaps(pickup_lat!!, pickup_lng!!, destination_lat!!, destination_lng!!)
+                                showOrderSummary()
+                            }
+                        }
+                    }
+                }
+                Status.ERROR -> {
+
+                }
+            }
+        })
+    }
+
 
     private fun showOrderSummary() {
         bottom_sheet_main.visibility = View.GONE
@@ -246,6 +299,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 val routes = jsonResponse.getJSONArray("routes")
                 val legs = routes.getJSONObject(0).getJSONArray("legs")
                 val steps = legs.getJSONObject(0).getJSONArray("steps")
+                val distance = legs.getJSONObject(0).getJSONObject("distance").getInt("value")
+
+                val distanceKm: Double = distance.toDouble()/1000
+                tv_distance.text = "Jarak: $distanceKm km"
 
                 for (i in 0 until steps.length()) {
                     val points =
@@ -267,6 +324,13 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
                 addMarkerToMaps()
 
+                //animate camera
+                val builder = LatLngBounds.Builder()
+                builder.include(LatLng(pickupLat, pickupLng))
+                builder.include(LatLng(destinationLat, destinationLng))
+                val bounds = builder.build()
+                mMap?.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 200))
+
             }, Response.ErrorListener {
             }) {}
         val requestQueue = Volley.newRequestQueue(context)
@@ -285,7 +349,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         var width = 75
         val b = BitmapFactory.decodeResource(resources, R.drawable.ic_pickup)
         val marker = Bitmap.createScaledBitmap(b, width, height, false)
-        val markerIcon = BitmapDescriptorFactory . fromBitmap (marker)
+        val markerIcon = BitmapDescriptorFactory.fromBitmap(marker)
 
         marker_pickup = mMap?.addMarker(
             MarkerOptions()
@@ -303,7 +367,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         width = 100
         val b2 = BitmapFactory.decodeResource(resources, R.drawable.ic_destination)
         val marker2 = Bitmap.createScaledBitmap(b2, width, height, false)
-        val markerIcon2 = BitmapDescriptorFactory . fromBitmap (marker2)
+        val markerIcon2 = BitmapDescriptorFactory.fromBitmap(marker2)
 
         marker_destination = mMap?.addMarker(
             MarkerOptions()

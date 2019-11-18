@@ -12,22 +12,48 @@ import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.amirarahmah.toradi_user.R
-import com.amirarahmah.toradi_user.data.model.Location
 import com.amirarahmah.toradi_user.ui.home.adapter.LocationAdapter
 import kotlinx.android.synthetic.main.fragment_search_location.*
 import kotlinx.android.synthetic.main.toolbar.*
+import android.content.Context
+import android.view.inputmethod.InputMethodManager
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import com.amirarahmah.toradi_user.data.model.Prediction
+import com.amirarahmah.toradi_user.data.model.Status
 
 
 class SearchLocationFragment : DialogFragment() {
 
     private val RESULT_MAPS: Int = 201
 
+    private lateinit var viewModel: LocationViewModel
+
+    private var latitude = 0.0
+    private var longitude = 0.0
+
+    //address type
+    //1. destination address
+    //2. pickup address
+    private var addressType = 1
+
+    private var destination_address = ""
+    private var pickup_address = ""
+
+    private var keyword = ""
+
     private lateinit var mAdapter: LocationAdapter
-    private val listLocation = arrayListOf<Location>()
+    private val listLocation = arrayListOf<Prediction>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NORMAL, R.style.FullScreenDialogStyle)
+        arguments?.let {
+            latitude = it.getDouble("latitude")
+            longitude = it.getDouble("longitude")
+            pickup_address = it.getString("pickup_address", "")
+            destination_address = it.getString("destination_address", "")
+        }
     }
 
     override fun onStart() {
@@ -57,25 +83,48 @@ class SearchLocationFragment : DialogFragment() {
             dialog!!.dismiss()
         }
 
+        viewModel = ViewModelProviders.of(this).get(LocationViewModel::class.java)
+
         choose_from_map.setOnClickListener {
             val intent = Intent(context, PlacePickerActivity::class.java)
             startActivityForResult(intent, RESULT_MAPS)
+            val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(et_destination.windowToken, 0)
         }
 
         setupRecyclerView()
 
+        et_pickup.setText(pickup_address)
+        et_destination.setText(destination_address)
+
+        et_destination.requestFocus()
+        val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
+
         et_destination.setOnEditorActionListener { textView, actionId, keyEvent ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                val keyword = et_destination.text.toString()
-                doSearchLocation(keyword)
+                val input = et_destination.text.toString()
+                if(keyword != input){
+                    addressType = 1
+                    keyword = input
+                    doSearchLocation(input)
+                }
+                val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(et_destination.windowToken, 0)
             }
             false
         }
 
         et_pickup.setOnEditorActionListener { textView, actionId, keyEvent ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                val keyword = et_destination.text.toString()
-                doSearchLocation(keyword)
+                val input = et_pickup.text.toString()
+                if(keyword != input){
+                    addressType = 2
+                    keyword = input
+                    doSearchLocation(input)
+                }
+                val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(et_pickup.windowToken, 0)
             }
             false
         }
@@ -83,12 +132,27 @@ class SearchLocationFragment : DialogFragment() {
 
 
     private fun doSearchLocation(keyword: String) {
-        listLocation.add(Location("Jl Terusan Cikampek", "Penanggungsn, kec Klojen, Kota Malang"))
-        listLocation.add(Location("Jl Terusan Cikampek", "Penanggungsn, kec Klojen, Kota Malang"))
-        listLocation.add(Location("Jl Terusan Cikampek", "Penanggungsn, kec Klojen, Kota Malang"))
+        viewModel.getPlaceAutocomplete(keyword, latitude, longitude)
 
-        rv_location.visibility = View.VISIBLE
-        mAdapter.notifyDataSetChanged()
+        viewModel.placeAutocomplete.observe(this, Observer {
+            when (it?.status) {
+                Status.SUCCESS -> {
+                    rv_location.visibility = View.VISIBLE
+
+                    listLocation.clear()
+
+                    if (it.data != null) {
+                        listLocation.addAll(it.data)
+                    }
+
+                    mAdapter.notifyDataSetChanged()
+                }
+                Status.ERROR -> {
+
+                }
+            }
+        })
+
     }
 
 
@@ -96,7 +160,14 @@ class SearchLocationFragment : DialogFragment() {
         val layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         rv_location.layoutManager = layoutManager
         rv_location.isNestedScrollingEnabled = false
-        mAdapter = LocationAdapter(listLocation, context!!)
+        mAdapter = LocationAdapter(listLocation, context!!){address ->
+            val i = Intent()
+                .putExtra("address", address)
+                .putExtra("address_type", addressType) //1 (destination address), 2 (pickup address)
+                .putExtra("from", 1) //if address is from place autocomplete
+            targetFragment!!.onActivityResult(targetRequestCode, Activity.RESULT_OK, i)
+            dismiss()
+        }
         rv_location.adapter = mAdapter
     }
 
@@ -111,8 +182,29 @@ class SearchLocationFragment : DialogFragment() {
                 .putExtra("address", address)
                 .putExtra("latitude", latitude)
                 .putExtra("longitude", longitude)
+                .putExtra("address_type", 1) //1 (destination address), 2 (pickup address)
+                .putExtra("from", 2) //if address is from maps
             targetFragment!!.onActivityResult(targetRequestCode, Activity.RESULT_OK, i)
             dismiss()
+        }
+    }
+
+    companion object {
+
+        fun newInstance(
+            latitude: Double,
+            longitude: Double,
+            pickup_address: String,
+            destination_address: String
+        ): SearchLocationFragment {
+            val fragment = SearchLocationFragment()
+            val args = Bundle()
+            args.putDouble("latitude", latitude)
+            args.putDouble("longitude", longitude)
+            args.putString("pickup_address", pickup_address)
+            args.putString("destination_address", destination_address)
+            fragment.arguments = args
+            return fragment
         }
     }
 }
