@@ -19,7 +19,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.amirarahmah.toradi_user.R
-import com.amirarahmah.toradi_user.data.model.Status
 import com.amirarahmah.toradi_user.util.PermissionUtils
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
@@ -48,12 +47,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private var pickup_lat: Double? = 0.0
     private var pickup_lng: Double? = 0.0
     private var pickup_address = ""
-    private var keterangan_awal = ""
 
     private var destination_lat: Double? = 0.0
     private var destination_lng: Double? = 0.0
     private var destination_address = ""
-    private var keterangan_tujuan = ""
 
     private var mFusedLocationProviderClient: FusedLocationProviderClient? = null
     private var mLocationCallback: LocationCallback? = null
@@ -64,7 +61,18 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private var marker_destination: Marker? = null
     /*Maps variable*/
 
+    private var price = 0
+    private var distance = 0.0
+    private var note = ""
+    private var inputValid = false
+
     private lateinit var viewModel: HomeViewModel
+
+    interface DonePickLocation{
+        fun updateData()
+    }
+
+    lateinit var mListener : DonePickLocation
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -86,13 +94,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
         container_search_destination.setOnClickListener {
             if (latitude != 0.0 && longitude != 0.0) {
-                val searchLocationFragment = SearchLocationFragment
-                    .newInstance(latitude!!, longitude!!, pickup_address, destination_address)
-                searchLocationFragment.setTargetFragment(this, 2)
-                searchLocationFragment.show(
-                    activity!!.supportFragmentManager,
-                    searchLocationFragment.tag
-                )
+                showSearchLocationFragment(1)
             }
         }
     }
@@ -125,8 +127,39 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         }
 
         getDeviceLocation()
+        setClick()
 
     }
+
+
+    private fun setClick() {
+
+        pickup.setOnClickListener {
+            showSearchLocationFragment(2)
+        }
+
+        destination.setOnClickListener {
+           showSearchLocationFragment(1)
+        }
+
+        btn_order.setOnClickListener {
+            if(inputValid){
+                val i = Intent(context, FindDriverActivity::class.java)
+                i.putExtra("pickup_lat", pickup_lat)
+                i.putExtra("pickup_lng", pickup_lng)
+                i.putExtra("pickup_address", pickup_address)
+                i.putExtra("destination_lat", destination_lat)
+                i.putExtra("destination_lng", destination_lng)
+                i.putExtra("destination_address", destination_address)
+                i.putExtra("note", note)
+                i.putExtra("passenger", 1)
+                i.putExtra("distance", distance)
+                i.putExtra("price", price)
+                startActivity(i)
+            }
+        }
+    }
+
 
     private fun getDeviceLocation() {
         mFusedLocationProviderClient = LocationServices
@@ -169,6 +202,17 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     }
 
 
+    private fun showSearchLocationFragment(type: Int) {
+        val searchLocationFragment = SearchLocationFragment
+            .newInstance(type, latitude!!, longitude!!, pickup_address, destination_address)
+        searchLocationFragment.setTargetFragment(this, 2)
+        searchLocationFragment.show(
+            activity!!.supportFragmentManager,
+            searchLocationFragment.tag
+        )
+    }
+
+
     private fun moveCamera(latitude: Double, longitude: Double) {
         val cameraUpdate = CameraUpdateFactory
             .newLatLngZoom(LatLng(latitude, longitude), 17f)
@@ -201,8 +245,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             val from = bundle.getInt("from", 1)
             val address = bundle.getString("address", "")
 
-            Log.d("OjekActivity", "address: $adddress_type")
-
             if (adddress_type == 1) {
                 destination_address = address
             } else {
@@ -229,35 +271,30 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
 
     private fun getLatLngFromAddress(address: String, type: Int) {
-        viewModel.getLatLng(address)
+        try {
+            val geocoder = Geocoder(context, Locale.getDefault())
+            val addresses = geocoder.getFromLocationName(address, 1)
+            if (addresses.isNotEmpty()) {
+                if (type == 1) { // address type is destination address
+                    destination_lat = addresses[0].latitude
+                    destination_lng = addresses[0].longitude
 
-        viewModel.geocodeResult.observe(this, androidx.lifecycle.Observer {
-            when (it.status) {
-                Status.SUCCESS -> {
-                    if (it.data != null) {
-                        if (type == 1) { // destination address
-                            destination_lat = it.data.location.lat
-                            destination_lng = it.data.location.lng
+                    addPolylinesToMaps(pickup_lat!!, pickup_lng!!, destination_lat!!, destination_lng!!)
+                    showOrderSummary()
 
-                            addPolylinesToMaps(pickup_lat!!, pickup_lng!!, destination_lat!!, destination_lng!!)
-                            showOrderSummary()
+                } else { // pickup address
+                    pickup_lat = addresses[0].latitude
+                    pickup_lng = addresses[0].longitude
 
-                        } else { // pickup address
-                            pickup_lat = it.data.location.lat
-                            pickup_lng = it.data.location.lng
-
-                            if(destination_lat != 0.0 && destination_lng != 0.0){
-                                addPolylinesToMaps(pickup_lat!!, pickup_lng!!, destination_lat!!, destination_lng!!)
-                                showOrderSummary()
-                            }
-                        }
+                    if(destination_lat != 0.0 && destination_lng != 0.0){
+                        addPolylinesToMaps(pickup_lat!!, pickup_lng!!, destination_lat!!, destination_lng!!)
+                        showOrderSummary()
                     }
                 }
-                Status.ERROR -> {
-
-                }
             }
-        })
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
 
@@ -265,11 +302,11 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         bottom_sheet_main.visibility = View.GONE
         val bottomSheetBehavior = BottomSheetBehavior.from(bottom_sheet_order)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-        bottomSheetBehavior.skipCollapsed = true
         bottomSheetBehavior.peekHeight = bottom_sheet_order.height
         tv_pickup.text = pickup_address
         tv_destination.text = destination_address
     }
+
 
     fun addPolylinesToMaps(
         pickupLat: Double,
@@ -299,10 +336,14 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 val routes = jsonResponse.getJSONArray("routes")
                 val legs = routes.getJSONObject(0).getJSONArray("legs")
                 val steps = legs.getJSONObject(0).getJSONArray("steps")
-                val distance = legs.getJSONObject(0).getJSONObject("distance").getInt("value")
 
-                val distanceKm: Double = distance.toDouble()/1000
-                tv_distance.text = "Jarak: $distanceKm km"
+                //get distance in km
+                val distanceMeter = legs.getJSONObject(0)
+                    .getJSONObject("distance").getInt("value")
+                distance = distanceMeter.toDouble()/1000
+                tv_distance.text = "Jarak: $distance km"
+
+                getTransportPrice()
 
                 for (i in 0 until steps.length()) {
                     val points =
@@ -316,7 +357,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
                     lineOptions.addAll(path[i])
                     lineOptions.width(12f)
-                    lineOptions.color(ContextCompat.getColor(context!!, R.color.colorPrimary))
+                    lineOptions.color(ContextCompat.getColor(context!!, R.color.colorAccent))
 
                 }
 
@@ -337,6 +378,16 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         requestQueue.add(directionsRequest)
 
     }
+
+
+    private fun getTransportPrice() {
+        inputValid = true
+        price = 10000
+        val textPrice = "Harga: Rp $price"
+        tv_price.text = textPrice
+        mListener.updateData()
+    }
+
 
     private fun addMarkerToMaps() {
         //add pickup marker
@@ -376,5 +427,16 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         )
     }
 
+
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        try {
+            this.mListener = activity as DonePickLocation
+        } catch (e: ClassCastException) {
+            throw ClassCastException(activity.toString() + " must implement OnCompleteListener")
+        }
+
+    }
 
 }

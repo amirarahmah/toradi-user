@@ -30,5 +30,35 @@
     <string name="pilih_lokasi_tujuan">Pilih Lokasi Tujuan</string>
     <string name="pilih_lokasi">Pilih Lokasi</string>
     <string name="loading_alamat">loading alamat...</string>
+    <string name="jumlah_penumpang">1 Penumpang</string>
+    <string name="tambah_catatan_untuk_pengemudi">Tambah catatan untuk pengemudi</string>
+    <string name="batalkan_pesanan">Batalkan Pesanan</string>
+    <string name="pesan_ojek">Pesan Ojek</string>
+    <string name="mencari_driver_terdekat">Mencari Driver Terdekat</string>
+    <string name="mohon_tunggu">Mohon Tunggu...</string>
+    <string name="kami_sedang_mencari_driver">Kami sedang mencari driver</string>
+    <string name="loading">loading</string>
+    <string name="riwayat">Riwayat</string>
+    <string name="status_pesanan">Status Pesanan</string>
+    <string name="harga">Harga</string>
+    <string name="jarak">Jarak</string>
+    <string name="sms">SMS</string>
+    <string name="telepon">Telepon</string>
+    <string name="berikan_penilaian">Berikan Penilaian</string>
+    <string name="penilaian_anda">Penilaian Anda</string>
+    <string name="password_anda">Password Anda</string>
+    <string name="ketik_ulang_password_anda">Ketik ulang password Anda</string>
+    <string name="password">Password</string>
+    <string name="ulangi_password">Ulangi Password</string>
+    <string name="email">Email</string>
+    <string name="cth_email">Cth: nama@gmail.com</string>
+    <string name="nama_lengkap">Nama Lengkap</string>
+    <string name="cth_nama">Cth: Nama</string>
+    <string name="register">Register</string>
+    <string name="login">Login</string>
+    <string name="ojek_toradi">Ojek\n Toradi</string>
+    <string name="bagaimana_perjalanan_anda">Bagaimana Perjalanan Anda?</string>
+    <string name="tuliskan_komentar_anda_disini">Tuliskan komentar Anda disini...</string>
+    <string name="kirim">Kirim</string>
 
 </resources>

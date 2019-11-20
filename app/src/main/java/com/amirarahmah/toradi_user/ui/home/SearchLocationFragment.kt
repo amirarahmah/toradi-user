@@ -49,6 +49,7 @@ class SearchLocationFragment : DialogFragment() {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NORMAL, R.style.FullScreenDialogStyle)
         arguments?.let {
+            addressType = it.getInt("type")
             latitude = it.getDouble("latitude")
             longitude = it.getDouble("longitude")
             pickup_address = it.getString("pickup_address", "")
@@ -81,6 +82,8 @@ class SearchLocationFragment : DialogFragment() {
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back)
         toolbar.setNavigationOnClickListener {
             dialog!!.dismiss()
+            val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(et_destination.windowToken, 0)
         }
 
         viewModel = ViewModelProviders.of(this).get(LocationViewModel::class.java)
@@ -97,7 +100,13 @@ class SearchLocationFragment : DialogFragment() {
         et_pickup.setText(pickup_address)
         et_destination.setText(destination_address)
 
-        et_destination.requestFocus()
+        if(addressType == 1){
+            et_destination.requestFocus()
+            et_destination.selectAll()
+        }else{
+            et_pickup.requestFocus()
+            et_pickup.selectAll()
+        }
         val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
 
@@ -192,6 +201,7 @@ class SearchLocationFragment : DialogFragment() {
     companion object {
 
         fun newInstance(
+            type: Int,
             latitude: Double,
             longitude: Double,
             pickup_address: String,
@@ -199,6 +209,7 @@ class SearchLocationFragment : DialogFragment() {
         ): SearchLocationFragment {
             val fragment = SearchLocationFragment()
             val args = Bundle()
+            args.putInt("type", type)
             args.putDouble("latitude", latitude)
             args.putDouble("longitude", longitude)
             args.putString("pickup_address", pickup_address)

@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.Toast
 import com.amirarahmah.toradi_user.R
 import com.amirarahmah.toradi_user.ui.home.MainActivity
+import com.amirarahmah.toradi_user.ui.login.FirstActivity
 import com.amirarahmah.toradi_user.ui.login.LoginActivity
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
@@ -41,7 +42,13 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun startAplikasi() {
-        navigateToMainActivity()
+        navigateToFirstActivity()
+    }
+
+    private fun navigateToFirstActivity() {
+        val mainIntent = Intent(this@SplashActivity, FirstActivity::class.java)
+        startActivity(mainIntent)
+        finish()
     }
 
     private fun navigateToLoginActivity() {

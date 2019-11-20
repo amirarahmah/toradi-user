@@ -1,6 +1,7 @@
 package com.amirarahmah.toradi_user.data.model
 
-data class Geocoding(
+data class Order(
+    val destination: String,
     val status: String,
-    val results: List<GeocodeResult>
+    val date: String
 )

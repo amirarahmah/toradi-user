@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.amirarahmah.toradi_user.R
-import com.amirarahmah.toradi_user.data.model.Loc
 import com.amirarahmah.toradi_user.data.model.Prediction
 import kotlinx.android.synthetic.main.item_location.view.*
 

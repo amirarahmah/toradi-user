@@ -1,5 +1,6 @@
 package com.amirarahmah.toradi_user.ui.home
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -10,23 +11,25 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 import androidx.drawerlayout.widget.DrawerLayout
 import android.util.DisplayMetrics
+import com.amirarahmah.toradi_user.ui.history.HistoryActivity
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), HomeFragment.DonePickLocation {
+
+    private var donePickLocation = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        setSupportActionBar(toolbar)
-        supportActionBar!!.setDisplayShowTitleEnabled(false)
+//        setSupportActionBar(toolbar)
+//        supportActionBar!!.setDisplayShowTitleEnabled(false)
 
         setfullwidth()
 
         val toggle = ActionBarDrawerToggle(
             this,
             drawer_layout,
-            toolbar,
             R.string.navigation_drawer_open,
             R.string.navigation_drawer_close
         )
@@ -41,11 +44,26 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_beranda -> {
                     updateFragment(HomeFragment())
                 }
+                R.id.nav_riwayat -> {
+                    val intent = Intent(this, HistoryActivity::class.java)
+                    startActivity(intent)
+                }
             }
             drawer_layout.closeDrawer(GravityCompat.START)
             false
         }
 
+        btn_nav.setOnClickListener {
+            if (donePickLocation) {
+                btn_nav.setImageResource(R.drawable.ic_menu)
+                updateFragment(HomeFragment())
+                donePickLocation = false
+            } else {
+                if (!drawer_layout.isDrawerOpen(GravityCompat.START)) {
+                    drawer_layout.openDrawer(GravityCompat.START)
+                }
+            }
+        }
     }
 
     private fun setfullwidth() {
@@ -72,11 +90,19 @@ class MainActivity : AppCompatActivity() {
 
 
     override fun onBackPressed() {
-        super.onBackPressed()
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
+        } else if (donePickLocation) {
+            btn_nav.setImageResource(R.drawable.ic_menu)
+            updateFragment(HomeFragment())
+            donePickLocation = false
         } else {
             super.onBackPressed()
         }
+    }
+
+    override fun updateData() {
+        btn_nav.setImageResource(R.drawable.ic_arrow_back)
+        donePickLocation = true
     }
 }
