@@ -6,6 +6,7 @@
 
     <color name="white">#ffffff</color>
     <color name="grey">#7f8c8d</color>
+    <color name="grey_transparent">#E6424242</color>
     <color name="background_grey">#E4E4E4</color>
     <color name="background_search">#EFF1F7</color>
     <color name="black_dividers">#1f000000</color>

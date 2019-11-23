@@ -1,5 +1,6 @@
 package com.amirarahmah.toradi_user.ui.home
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -11,19 +12,30 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 import androidx.drawerlayout.widget.DrawerLayout
 import android.util.DisplayMetrics
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import com.amirarahmah.toradi_user.data.model.User
 import com.amirarahmah.toradi_user.ui.history.HistoryActivity
+import com.amirarahmah.toradi_user.ui.login.FirstActivity
+import com.amirarahmah.toradi_user.ui.setting.SettingActivity
+import com.amirarahmah.toradi_user.util.Injection
+import com.amirarahmah.toradi_user.util.PreferenceHelper
+import com.amirarahmah.toradi_user.util.PreferenceHelper.set
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 
 
 class MainActivity : AppCompatActivity(), HomeFragment.DonePickLocation {
 
+    private lateinit var viewModel: MainViewModel
     private var donePickLocation = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-//        setSupportActionBar(toolbar)
-//        supportActionBar!!.setDisplayShowTitleEnabled(false)
+        val viewModelFactory = MainViewModelFact(Injection.provideUserRepository(this))
+        viewModel = ViewModelProviders.of(this, viewModelFactory).get(MainViewModel::class.java)
 
         setfullwidth()
 
@@ -37,21 +49,16 @@ class MainActivity : AppCompatActivity(), HomeFragment.DonePickLocation {
         toggle.syncState()
 
         updateFragment(HomeFragment())
-        setNavHeader()
 
-        nav_view.setNavigationItemSelectedListener { menu ->
-            when (menu.itemId) {
-                R.id.nav_beranda -> {
-                    updateFragment(HomeFragment())
-                }
-                R.id.nav_riwayat -> {
-                    val intent = Intent(this, HistoryActivity::class.java)
-                    startActivity(intent)
-                }
+        //set navigation drawer header
+        viewModel.getUserData()
+        viewModel.user.observe(this, Observer {
+            if (it != null) {
+                setNavHeader(it)
             }
-            drawer_layout.closeDrawer(GravityCompat.START)
-            false
-        }
+        })
+
+        setNavigationListener()
 
         btn_nav.setOnClickListener {
             if (donePickLocation) {
@@ -66,6 +73,46 @@ class MainActivity : AppCompatActivity(), HomeFragment.DonePickLocation {
         }
     }
 
+
+    private fun setNavigationListener() {
+        nav_view.setNavigationItemSelectedListener { menu ->
+            when (menu.itemId) {
+                R.id.nav_beranda -> {
+                    updateFragment(HomeFragment())
+                }
+                R.id.nav_riwayat -> {
+                    val intent = Intent(this, HistoryActivity::class.java)
+                    startActivity(intent)
+                }
+                R.id.nav_setting -> {
+                    val intent = Intent(this, SettingActivity::class.java)
+                    startActivity(intent)
+                }
+                R.id.nav_logout ->{
+                    val ad = AlertDialog.Builder(this@MainActivity)
+                    ad.create()
+                    ad.setTitle("Logout")
+                    ad.setMessage("Apakah Anda yakin ingin keluar?")
+                    ad.setPositiveButton("Ya") { dialog, which ->
+                        val prefs = PreferenceHelper.defaultPrefs(this@MainActivity)
+                        prefs["loggedIn"] = false
+
+                        val i = Intent(this@MainActivity, FirstActivity::class.java)
+                        startActivity(i)
+                        finish()
+                    }
+                    ad.setNegativeButton("Tidak") { dialog, which ->
+                        dialog.dismiss()
+                    }
+
+                    ad.show()
+                }
+            }
+            drawer_layout.closeDrawer(GravityCompat.START)
+            false
+        }
+    }
+
     private fun setfullwidth() {
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
@@ -75,10 +122,22 @@ class MainActivity : AppCompatActivity(), HomeFragment.DonePickLocation {
         nav_view.layoutParams = params
     }
 
-    private fun setNavHeader() {
+
+    private fun setNavHeader(user: User) {
         val v = nav_view.getHeaderView(0)
-        v.tv_name.text = "Amira Fauzia"
-        v.tv_email.text = "amirarahmah@gmail.com"
+        v.tv_name.text = user.name
+        v.tv_email.text = user.email
+        if (user.profile_photo != null) {
+            Glide.with(this)
+                .load(user.profile_photo)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .into(v.image_profile)
+        } else {
+            Glide.with(this)
+                .load(R.drawable.no_profile_image)
+                .into(v.image_profile)
+        }
     }
 
 

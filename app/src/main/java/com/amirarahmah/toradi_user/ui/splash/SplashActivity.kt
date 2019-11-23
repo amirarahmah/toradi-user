@@ -8,6 +8,8 @@ import com.amirarahmah.toradi_user.R
 import com.amirarahmah.toradi_user.ui.home.MainActivity
 import com.amirarahmah.toradi_user.ui.login.FirstActivity
 import com.amirarahmah.toradi_user.ui.login.LoginActivity
+import com.amirarahmah.toradi_user.util.PreferenceHelper
+import com.amirarahmah.toradi_user.util.PreferenceHelper.get
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
 import java.util.ArrayList
@@ -42,7 +44,12 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun startAplikasi() {
-        navigateToFirstActivity()
+        val prefs = PreferenceHelper.defaultPrefs(this)
+        if (prefs["loggedIn"]!!) {
+            navigateToMainActivity()
+        } else {
+            navigateToFirstActivity()
+        }
     }
 
     private fun navigateToFirstActivity() {

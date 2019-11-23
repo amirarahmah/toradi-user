@@ -57,7 +57,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="12dp"
                 android:layout_marginEnd="8dp"
-                android:text="@string/lokasi_tujuan"
+                android:text="@string/lokasi_penjemputan"
                 android:textColor="@color/secondary_text"
                 android:textSize="12sp"
                 app:layout_constraintEnd_toStartOf="@+id/imageView4"
@@ -177,7 +177,7 @@
             android:textColor="@color/primary_text"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Harga: 20.000" />
+            android:text="@string/harga2" />
 
         <TextView
             android:id="@+id/tv_distance"

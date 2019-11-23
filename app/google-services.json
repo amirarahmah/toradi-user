@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "438278264389",
+    "firebase_url": "https://toradi-31deb.firebaseio.com",
+    "project_id": "toradi-31deb",
+    "storage_bucket": "toradi-31deb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:438278264389:android:e2a4506f7f792d8dcf352c",
+        "android_client_info": {
+          "package_name": "com.amirarahmah.toradi_user"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "438278264389-n3jo1ui0ratduog2e53np7tr1l9jv84i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.amirarahmah.toradi_user",
+            "certificate_hash": "de7c6f809d045e451b853f5f7a21d3a24b1d9d4d"
+          }
+        },
+        {
+          "client_id": "438278264389-9fvffk0g0t5r2b30ru85rku5e3q3ftk6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBG4ESqpnkA6Z9dxZoZQ6r0o4Z9B8CVhro"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "438278264389-9fvffk0g0t5r2b30ru85rku5e3q3ftk6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

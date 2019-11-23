@@ -90,6 +90,7 @@ class SearchLocationFragment : DialogFragment() {
 
         choose_from_map.setOnClickListener {
             val intent = Intent(context, PlacePickerActivity::class.java)
+            intent.putExtra("type", addressType)
             startActivityForResult(intent, RESULT_MAPS)
             val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(et_destination.windowToken, 0)
@@ -187,11 +188,12 @@ class SearchLocationFragment : DialogFragment() {
             val address = data!!.getStringExtra("address")
             val latitude = data.getDoubleExtra("latitude", 0.0)
             val longitude = data.getDoubleExtra("longitude", 0.0)
+            val type = data.getIntExtra("type", 1)
             val i = Intent()
                 .putExtra("address", address)
                 .putExtra("latitude", latitude)
                 .putExtra("longitude", longitude)
-                .putExtra("address_type", 1) //1 (destination address), 2 (pickup address)
+                .putExtra("address_type", type) //1 (destination address), 2 (pickup address)
                 .putExtra("from", 2) //if address is from maps
             targetFragment!!.onActivityResult(targetRequestCode, Activity.RESULT_OK, i)
             dismiss()

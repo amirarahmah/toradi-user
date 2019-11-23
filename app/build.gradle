@@ -76,7 +76,7 @@ dependencies {
 
     //rxjava
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
-    implementation 'io.reactivex.rxjava2:rxjava:2.1.12'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.9'
     implementation 'io.reactivex.rxjava2:rxkotlin:2.2.0'
 
     //room persistence
@@ -91,4 +91,10 @@ dependencies {
 
     implementation 'com.android.volley:volley:1.1.1'
 
+    //firebase
+    implementation 'com.google.firebase:firebase-analytics:17.2.1'
+    implementation 'com.google.firebase:firebase-messaging:20.0.1'
+
 }
+
+apply plugin: 'com.google.gms.google-services'

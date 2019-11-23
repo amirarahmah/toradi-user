@@ -7,12 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.amirarahmah.toradi_user.R
-import com.amirarahmah.toradi_user.data.model.Order
+import com.amirarahmah.toradi_user.data.model.TestOrder
 import com.amirarahmah.toradi_user.ui.detailorder.DetailOrderActivity
 import kotlinx.android.synthetic.main.item_order.view.*
 
 class HistoryAdapter(
-    val listOrder: ArrayList<Order>,
+    val listOrder: ArrayList<TestOrder>,
     val context: Context,
     val onClickListener: (String) -> Unit
 ) : RecyclerView.Adapter<HistoryAdapter.MyViewHolder>() {

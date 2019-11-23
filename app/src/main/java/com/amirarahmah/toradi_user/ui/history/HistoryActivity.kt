@@ -1,23 +1,18 @@
 package com.amirarahmah.toradi_user.ui.history
 
-import android.app.Activity
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.amirarahmah.toradi_user.R
-import com.amirarahmah.toradi_user.data.model.Order
-import com.amirarahmah.toradi_user.data.model.Prediction
-import com.amirarahmah.toradi_user.ui.home.adapter.LocationAdapter
+import com.amirarahmah.toradi_user.data.model.TestOrder
 import kotlinx.android.synthetic.main.activity_history.*
-import kotlinx.android.synthetic.main.fragment_search_location.*
 
 class HistoryActivity : AppCompatActivity() {
 
     private lateinit var mAdapter: HistoryAdapter
-    private val lisOrder = arrayListOf<Order>()
+    private val listOrder = arrayListOf<TestOrder>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,12 +27,12 @@ class HistoryActivity : AppCompatActivity() {
 
 
     private fun getHistoryOrder() {
-        lisOrder.add(Order("Jl Veteran 11", "Order selesai", "2019-11-14"))
-        lisOrder.add(Order("Jl Veteran 11", "Order selesai", "2019-11-14"))
-        lisOrder.add(Order("Jl Veteran 11", "Order selesai", "2019-11-14"))
-        lisOrder.add(Order("Jl Veteran 11", "Order selesai", "2019-11-14"))
-        lisOrder.add(Order("Jl Veteran 11", "Order selesai", "2019-11-14"))
-        lisOrder.add(Order("Jl Veteran 11", "Order selesai", "2019-11-14"))
+        listOrder.add(TestOrder("Jl Veteran 11", "Order selesai", "2019-11-14"))
+        listOrder.add(TestOrder("Jl Veteran 11", "Order selesai", "2019-11-14"))
+        listOrder.add(TestOrder("Jl Veteran 11", "Order selesai", "2019-11-14"))
+        listOrder.add(TestOrder("Jl Veteran 11", "Order selesai", "2019-11-14"))
+        listOrder.add(TestOrder("Jl Veteran 11", "Order selesai", "2019-11-14"))
+        listOrder.add(TestOrder("Jl Veteran 11", "Order selesai", "2019-11-14"))
     }
 
 
@@ -45,7 +40,7 @@ class HistoryActivity : AppCompatActivity() {
         val layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         rv_order.layoutManager = layoutManager
         rv_order.isNestedScrollingEnabled = false
-        mAdapter = HistoryAdapter(lisOrder, this){}
+        mAdapter = HistoryAdapter(listOrder, this){}
         rv_order.adapter = mAdapter
     }
 

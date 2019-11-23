@@ -19,7 +19,9 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.amirarahmah.toradi_user.R
+import com.amirarahmah.toradi_user.data.model.Status
 import com.amirarahmah.toradi_user.util.PermissionUtils
+import com.amirarahmah.toradi_user.util.showSnackbarInfo
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
@@ -63,7 +65,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
     private var price = 0
     private var distance = 0.0
-    private var note = ""
+    private var note = "-"
     private var inputValid = false
 
     private lateinit var viewModel: HomeViewModel
@@ -259,11 +261,23 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             if (from == 1) { // address from place autocomplete
                 getLatLngFromAddress(address, adddress_type)
             } else { // address from maps picker
-                destination_lat = bundle.getDouble("latitude", 0.0)
-                destination_lng = bundle.getDouble("longitude", 0.0)
+                if(adddress_type == 1){
+                    destination_lat = bundle.getDouble("latitude", 0.0)
+                    destination_lng = bundle.getDouble("longitude", 0.0)
 
-                addPolylinesToMaps(pickup_lat!!, pickup_lng!!, destination_lat!!, destination_lng!!)
-                showOrderSummary()
+                    addPolylinesToMaps(pickup_lat!!, pickup_lng!!, destination_lat!!, destination_lng!!)
+                    showOrderSummary()
+                }else{
+                    pickup_lat = bundle.getDouble("latitude", 0.0)
+                    pickup_lng = bundle.getDouble("longitude", 0.0)
+
+                    if(destination_lat != 0.0 && destination_lng != 0.0){
+                        addPolylinesToMaps(pickup_lat!!, pickup_lng!!, destination_lat!!, destination_lng!!)
+                        showOrderSummary()
+                    }
+
+                }
+
             }
 
         }
@@ -381,11 +395,24 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
 
     private fun getTransportPrice() {
-        inputValid = true
-        price = 10000
-        val textPrice = "Harga: Rp $price"
-        tv_price.text = textPrice
-        mListener.updateData()
+        viewModel.getTransportPrice(distance)
+
+        viewModel.price.observe(this, androidx.lifecycle.Observer {
+            when(it.status){
+                Status.SUCCESS -> {
+                    if(it.data != null){
+                        inputValid = true
+                        price = it.data.transport_price
+                        val textPrice = "Harga: Rp $price"
+                        tv_price.text = textPrice
+                        mListener.updateData()
+                    }
+                }
+                Status.ERROR -> {
+                    activity?.showSnackbarInfo(""+it.message)
+                }
+            }
+        })
     }
 
 

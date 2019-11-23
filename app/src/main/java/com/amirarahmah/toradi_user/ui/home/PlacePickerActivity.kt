@@ -41,8 +41,15 @@ class PlacePickerActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_place_picker)
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.location_map) as SupportMapFragment
-
         mapFragment.getMapAsync(this)
+
+        val type = intent.getIntExtra("type", 1)
+
+        if(type == 1){
+            tv_title.text = resources.getString(R.string.pilih_lokasi_tujuan)
+        }else{
+            tv_title.text = resources.getString(R.string.pilih_lokasi_penjemputan)
+        }
 
         btn_back.setOnClickListener {
             finish()
@@ -53,6 +60,7 @@ class PlacePickerActivity : AppCompatActivity(), OnMapReadyCallback {
             resultData.putExtra("latitude", latitude)
             resultData.putExtra("longitude", longitude)
             resultData.putExtra("address", address)
+            resultData.putExtra("type", type)
             setResult(Activity.RESULT_OK, resultData)
             onBackPressed()
         }
