@@ -20,8 +20,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.login.FirstActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity android:name=".ui.setting.EditProfileActivity"></activity>
+        <activity
+            android:name=".ui.login.FirstActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".ui.activeorder.ActiveOrderActivity" />
 
         <meta-data
@@ -50,9 +52,10 @@
         <activity
             android:name=".ui.home.MainActivity"
             android:label="@string/title_activity_main"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".ui.splash.SplashActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.splash.SplashActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -60,30 +63,40 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.detailorder.DetailOrderActivity"
+        <activity
+            android:name=".ui.detailorder.DetailOrderActivity"
             android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name=".ui.detailorder.DetailOrderActivity"/>
+                <action android:name=".ui.detailorder.DetailOrderActivity" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.setting.SettingActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".ui.history.HistoryActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".ui.register.RegisterActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".ui.login.LoginActivity"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ui.detailorder.DetailOrderActivity2"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
+            android:name=".ui.setting.SettingActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.history.HistoryActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.register.RegisterActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.login.LoginActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.home.PlacePickerActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.home.FindDriverActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

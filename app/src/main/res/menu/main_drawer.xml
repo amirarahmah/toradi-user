@@ -6,9 +6,15 @@
         android:textColor="@color/grey"
         android:title="@string/home" />
     <item
+        android:id="@+id/nav_active"
+        android:title="@string/pesanan_aktif"
+        android:icon="@drawable/bookmark"
+        android:textColor="@color/grey"
+        />
+    <item
         android:id="@+id/nav_riwayat"
         android:title="@string/riwayat"
-        android:icon="@drawable/ic_home"
+        android:icon="@drawable/ic_history"
         android:textColor="@color/grey"
         />
     <item

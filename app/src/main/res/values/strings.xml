@@ -69,5 +69,8 @@
     <string name="pengaturan">Pengaturan</string>
     <string name="driver_not_found">Pengemudi tidak ditemukan</string>
     <string name="harga2">Harga:</string>
+    <string name="pesanan_aktif">Pesanan Aktif</string>
+    <string name="ubah">Ubah Profil</string>
+    <string name="whatsapp">Whatsapp</string>
 
 </resources>

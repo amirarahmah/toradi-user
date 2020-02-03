@@ -15,11 +15,6 @@
             android:orientation="vertical"
             tools:context=".ui.detailorder.DetailOrderActivity">
 
-            <fragment
-                android:id="@+id/location_map"
-                android:name="com.google.android.gms.maps.SupportMapFragment"
-                android:layout_width="match_parent"
-                android:layout_height="220dp" />
 
             <TextView
                 android:id="@+id/textView"

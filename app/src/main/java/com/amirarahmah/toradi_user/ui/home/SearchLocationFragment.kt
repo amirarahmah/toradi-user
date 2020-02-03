@@ -142,7 +142,7 @@ class SearchLocationFragment : DialogFragment() {
 
 
     private fun doSearchLocation(keyword: String) {
-        viewModel.getPlaceAutocomplete(keyword, latitude, longitude)
+        viewModel.getPlaceSuggestion(keyword, latitude, longitude)
 
         viewModel.placeAutocomplete.observe(this, Observer {
             when (it?.status) {

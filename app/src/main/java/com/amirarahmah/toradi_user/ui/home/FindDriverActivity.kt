@@ -68,6 +68,8 @@ class FindDriverActivity : AppCompatActivity() {
         setupBroadcastReceiver()
         sendOrderOjek()
 
+        ripple_bg.startRippleAnimation()
+
         viewModel.isLoading.observe(this, Observer {
             if(it == true){
                 showLoading()
@@ -107,6 +109,7 @@ class FindDriverActivity : AppCompatActivity() {
                     }
                 }
                 Status.ERROR -> {
+                    ripple_bg.stopRippleAnimation()
                     this.showSnackbarInfo("" + it.message)
                 }
             }
@@ -126,7 +129,7 @@ class FindDriverActivity : AppCompatActivity() {
                 cancelOrder()
             }
             ad.setNegativeButton("Tidak") { dialog, which ->
-
+                dialog.dismiss()
             }
 
             ad.show()

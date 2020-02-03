@@ -181,7 +181,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 latitude = location.latitude
                 longitude = location.longitude
                 moveCamera(latitude!!, longitude!!)
-                mFusedLocationProviderClient!!.removeLocationUpdates(mLocationCallback!!)
             }
         }
 
@@ -455,6 +454,12 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     }
 
 
+    override fun onDestroy() {
+        super.onDestroy()
+        if(mFusedLocationProviderClient != null){
+            mFusedLocationProviderClient!!.removeLocationUpdates(mLocationCallback!!)
+        }
+    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

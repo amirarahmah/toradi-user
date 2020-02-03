@@ -3,16 +3,25 @@ package com.amirarahmah.toradi_user.ui.history
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.amirarahmah.toradi_user.R
-import com.amirarahmah.toradi_user.data.model.TestOrder
+import com.amirarahmah.toradi_user.data.model.Order
+import com.amirarahmah.toradi_user.data.model.Status
+import com.amirarahmah.toradi_user.util.PreferenceHelper
+import com.amirarahmah.toradi_user.util.PreferenceHelper.get
+import com.amirarahmah.toradi_user.util.showSnackbarInfo
 import kotlinx.android.synthetic.main.activity_history.*
 
 class HistoryActivity : AppCompatActivity() {
 
     private lateinit var mAdapter: HistoryAdapter
-    private val listOrder = arrayListOf<TestOrder>()
+    private val listOrder = arrayListOf<Order>()
+
+    private lateinit var viewModel: OrderViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,18 +30,44 @@ class HistoryActivity : AppCompatActivity() {
         supportActionBar?.title = "Riwayat"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        viewModel = ViewModelProviders.of(this).get(OrderViewModel::class.java)
+
+        viewModel.isLoading.observe(this, Observer {
+            if (it == true) {
+                progressBar.visibility = View.VISIBLE
+            } else {
+                progressBar.visibility = View.GONE
+            }
+        })
+
         setupRecyclerView()
-        getHistoryOrder()
+        getOrderHistory()
     }
 
 
-    private fun getHistoryOrder() {
-        listOrder.add(TestOrder("Jl Veteran 11", "Order selesai", "2019-11-14"))
-        listOrder.add(TestOrder("Jl Veteran 11", "Order selesai", "2019-11-14"))
-        listOrder.add(TestOrder("Jl Veteran 11", "Order selesai", "2019-11-14"))
-        listOrder.add(TestOrder("Jl Veteran 11", "Order selesai", "2019-11-14"))
-        listOrder.add(TestOrder("Jl Veteran 11", "Order selesai", "2019-11-14"))
-        listOrder.add(TestOrder("Jl Veteran 11", "Order selesai", "2019-11-14"))
+    private fun getOrderHistory() {
+        val prefs = PreferenceHelper.defaultPrefs(this)
+        val token = prefs["token", ""]
+
+        viewModel.getOrderHistory(token!!)
+
+        viewModel.listOrder.observe(this, Observer {
+            when (it?.status) {
+                Status.SUCCESS -> {
+                    if (it.data != null) {
+                        val responseList = it.data
+
+                        listOrder.clear()
+                        listOrder.addAll(responseList)
+
+                        mAdapter.notifyDataSetChanged()
+                    }
+                }
+                Status.ERROR -> {
+                    this.showSnackbarInfo(""+it.message)
+                }
+            }
+        })
     }
 
 
@@ -43,6 +78,7 @@ class HistoryActivity : AppCompatActivity() {
         mAdapter = HistoryAdapter(listOrder, this){}
         rv_order.adapter = mAdapter
     }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {

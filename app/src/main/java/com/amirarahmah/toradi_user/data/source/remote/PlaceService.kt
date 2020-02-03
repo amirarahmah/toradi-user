@@ -1,6 +1,6 @@
 package com.amirarahmah.toradi_user.data.source.remote
 
-import com.amirarahmah.toradi_user.data.model.PlaceAutocomplete
+import com.amirarahmah.toradi_user.data.model.Place
 import io.reactivex.Observable
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -11,11 +11,11 @@ import retrofit2.http.Query
 interface PlaceService {
 
     @GET("json")
-    fun getPlaceAutocomplete(@Query("input") input: String,
-                             @Query("location") location: String,
-                             @Query("radius") radius: Int,
-                             @Query("key") key: String)
-            : Observable<PlaceAutocomplete>
+    fun getPlaceSuggestion(@Query("input") input: String,
+                           @Query("location") location: String,
+                           @Query("radius") radius: Int,
+                           @Query("key") key: String)
+            : Observable<Place>
 
     companion object Factory {
 

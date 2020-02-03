@@ -22,15 +22,36 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/imageView6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/location"
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/textView2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/textView">
+
+        <com.skyfishjy.library.RippleBackground
+            android:id="@+id/ripple_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:rb_color="#0099CC"
+            app:rb_duration="3000"
+            app:rb_radius="32dp"
+            app:rb_rippleAmount="4"
+            app:rb_scale="6">
+
+
+            <ImageView
+                android:id="@+id/imageView6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/location"
+                android:layout_centerInParent="true"/>
+
+        </com.skyfishjy.library.RippleBackground>
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/textView2"

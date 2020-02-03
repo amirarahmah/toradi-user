@@ -1,7 +1,6 @@
 package com.amirarahmah.toradi_user.data.model
 
-data class TestOrder(
-    val destination: String,
+data class Place(
     val status: String,
-    val date: String
+    val predictions: List<Prediction>
 )

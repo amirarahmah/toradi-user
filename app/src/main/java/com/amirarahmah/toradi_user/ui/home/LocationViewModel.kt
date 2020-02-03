@@ -1,16 +1,14 @@
 package com.amirarahmah.toradi_user.ui.home
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.amirarahmah.toradi_user.R
 import com.amirarahmah.toradi_user.data.model.Prediction
 import com.amirarahmah.toradi_user.data.model.Resource
 import com.amirarahmah.toradi_user.data.source.remote.PlaceService
-import com.google.android.gms.location.LocationServices
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.activity_detail_order.*
 
 class LocationViewModel : ViewModel() {
 
@@ -21,11 +19,11 @@ class LocationViewModel : ViewModel() {
     var placeAutocomplete = MutableLiveData<Resource<List<Prediction>>>()
     private val compositeDisposable = CompositeDisposable()
 
-    fun getPlaceAutocomplete(input: String, latitude: Double, longitude: Double){
+    fun getPlaceSuggestion(input: String, latitude: Double, longitude: Double){
         val location = "$latitude,$longitude"
         val apiKey = "AIzaSyCCCMdJd6BGpTEuge2crPT3oV8v5coY8PU"
 
-        val disposable = placeService.getPlaceAutocomplete(input,location, 5000, apiKey)
+        val disposable = placeService.getPlaceSuggestion(input,location, 5000, apiKey)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
             .subscribe({

@@ -71,9 +71,15 @@ interface ApiService {
     fun sendReview(
         @Header("Authorization") token: String,
         @Field("order_id") order_id: Int,
-        @Field("rating") rating: Double,
+        @Field("rating") rating: Int,
         @Field("review") review: String
     ): Observable<Response>
+
+    @GET("user/order/check_has_reviewed/{order_id}")
+    fun checkHasReviewed(
+        @Header("Authorization") token: String,
+        @Path("order_id") order_id: Int
+    ): Observable<BaseResponse<List<Review>>>
 
     companion object Factory {
 

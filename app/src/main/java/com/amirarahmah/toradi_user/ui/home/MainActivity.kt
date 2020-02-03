@@ -15,6 +15,7 @@ import android.util.DisplayMetrics
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.amirarahmah.toradi_user.data.model.User
+import com.amirarahmah.toradi_user.ui.activeorder.ActiveOrderActivity
 import com.amirarahmah.toradi_user.ui.history.HistoryActivity
 import com.amirarahmah.toradi_user.ui.login.FirstActivity
 import com.amirarahmah.toradi_user.ui.setting.SettingActivity
@@ -79,6 +80,10 @@ class MainActivity : AppCompatActivity(), HomeFragment.DonePickLocation {
             when (menu.itemId) {
                 R.id.nav_beranda -> {
                     updateFragment(HomeFragment())
+                }
+                R.id.nav_active -> {
+                    val intent = Intent(this, ActiveOrderActivity::class.java)
+                    startActivity(intent)
                 }
                 R.id.nav_riwayat -> {
                     val intent = Intent(this, HistoryActivity::class.java)

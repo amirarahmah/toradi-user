@@ -1,4 +1,4 @@
-package com.amirarahmah.toradi_user.ui.history
+package com.amirarahmah.toradi_user.ui.activeorder
 
 import android.content.Context
 import android.content.Intent
@@ -8,14 +8,14 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.amirarahmah.toradi_user.R
 import com.amirarahmah.toradi_user.data.model.Order
-import com.amirarahmah.toradi_user.ui.detailorder.DetailOrderActivity2
+import com.amirarahmah.toradi_user.ui.detailorder.DetailOrderActivity
 import kotlinx.android.synthetic.main.item_order.view.*
 
-class HistoryAdapter(
+class OrderAdapter(
     val listOrder: ArrayList<Order>,
     val context: Context,
     val onClickListener: (String) -> Unit
-) : RecyclerView.Adapter<HistoryAdapter.MyViewHolder>() {
+) : RecyclerView.Adapter<OrderAdapter.MyViewHolder>() {
 
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): MyViewHolder {
         val view = LayoutInflater.from(p0.context)
@@ -55,7 +55,7 @@ class HistoryAdapter(
         holder.tvDate.text = order.created_at.split("T")[0]
 
         holder.container.setOnClickListener {
-            val intent = Intent(context, DetailOrderActivity2::class.java)
+            val intent = Intent(context, DetailOrderActivity::class.java)
             intent.putExtra("order_id", order.id)
             context.startActivity(intent)
         }
