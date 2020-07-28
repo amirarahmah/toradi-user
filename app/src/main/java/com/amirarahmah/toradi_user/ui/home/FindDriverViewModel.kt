@@ -18,6 +18,7 @@ class FindDriverViewModel : ViewModel() {
     }
 
     var order = MutableLiveData<Resource<OrderResponse>>()
+    val detailOrder = MutableLiveData<Resource<Order>>()
     var orderCanceled = MutableLiveData<Resource<String>>()
 
     var isLoading = MutableLiveData<Boolean>()
@@ -63,6 +64,25 @@ class FindDriverViewModel : ViewModel() {
                 isLoading.value = false
                 orderCanceled.value = Resource.error("Gagal membatalkan order", null)
             })
+        compositeDisposable.add(disposable)
+    }
+
+    fun getDetailOrder(token: String, orderId : Int){
+        isLoading.value = true
+        val disposable = apiService.getDetailOrder("Bearer $token", orderId)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
+            .subscribe({
+                isLoading.value = false
+                this.detailOrder.value = Resource.success(it.data)
+            }, {
+                isLoading.value = false
+                order.value = Resource.error(
+                    "Gagal menghubungi server! Pastikan Anda terhubung ke Jaringan Internet!",
+                    null
+                )
+            })
+
         compositeDisposable.add(disposable)
     }
 

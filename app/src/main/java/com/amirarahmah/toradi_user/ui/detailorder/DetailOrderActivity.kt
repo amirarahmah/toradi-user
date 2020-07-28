@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
@@ -91,6 +92,12 @@ class DetailOrderActivity : AppCompatActivity(), OnMapReadyCallback, ReviewFragm
         val extras = intent.extras
         orderId = extras!!.getInt("order_id", 0)
 
+        //get order_id from push notification data
+        val idString = extras.getString("order_id","")
+        if(idString.isNotBlank()){
+            orderId = idString.toInt()
+        }
+
         val mapFragment =
             supportFragmentManager.findFragmentById(R.id.location_map) as SupportMapFragment
 
@@ -100,6 +107,7 @@ class DetailOrderActivity : AppCompatActivity(), OnMapReadyCallback, ReviewFragm
         token = prefs["token", ""]
 
         setupBroadcastReceiver()
+        setupViewModel()
 
     }
 
@@ -121,7 +129,6 @@ class DetailOrderActivity : AppCompatActivity(), OnMapReadyCallback, ReviewFragm
         }
         mMap?.isMyLocationEnabled = true
 
-        setupViewModel()
         getDetailOrder()
     }
 
@@ -414,6 +421,7 @@ class DetailOrderActivity : AppCompatActivity(), OnMapReadyCallback, ReviewFragm
     override fun onResume() {
         super.onResume()
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, mIntentFilter)
+        getDetailOrder()
     }
 
     override fun onPause() {

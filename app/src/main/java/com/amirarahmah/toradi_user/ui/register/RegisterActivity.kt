@@ -37,6 +37,8 @@ class RegisterActivity : AppCompatActivity() {
         val viewModelFactory = RegisterViewModelFact( prefs)
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(RegisterViewModel::class.java)
 
+        loading = ProgressDialog(this)
+
         btn_register.setOnClickListener {
             validateRegister()
         }

@@ -22,10 +22,13 @@ interface ApiService {
     @POST("user/register")
     fun doRegister(
         @Field("email") email: String,
-        @Field("fullname") fullname: String,
+        @Field("name") fullname: String,
         @Field("phone") phone: String,
         @Field("password") password: String
     ): Observable<RegisterResponse>
+
+    @GET("user/nearby_driver")
+    fun getNearbyDriver(): Observable<BaseResponse<List<Driver>>>
 
     @GET("user/price/{distance}")
     fun getTransportPrice(
@@ -86,7 +89,7 @@ interface ApiService {
         fun create(): ApiService {
 
             val mRetrofit = Retrofit.Builder()
-                .baseUrl("https://ojek-toradi.000webhostapp.com/api/v1/")
+                .baseUrl("https://ojektoradi.com/api/v1/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .client(ApiModule.getClient())

@@ -72,5 +72,16 @@
     <string name="pesanan_aktif">Pesanan Aktif</string>
     <string name="ubah">Ubah Profil</string>
     <string name="whatsapp">Whatsapp</string>
+    <string name="data_penumpang">Data Penumpang</string>
+    <string name="simpan">Simpan</string>
+    <string name="kondisi">Kondisi</string>
+    <string name="membawa_kursi_roda">Membawa kursi roda?</string>
+    <string name="tidak">Tidak</string>
+    <string name="ya">Ya</string>
+    <string name="masukkan_data_penumpang">Masukkan Data Penumpang</string>
+    <string name="atrs">*</string>
+    <string name="satu">Satu</string>
+    <string name="dua">Dua</string>
+    <string name="jumlah_penumpang2">Jumlah Penumpang</string>
 
 </resources>

@@ -27,6 +27,8 @@ class FindDriverActivity : AppCompatActivity() {
     //for broadcast receiver
     private lateinit var broadcastReceiver: BroadcastReceiver
     private lateinit var mIntentFilter: IntentFilter
+    private lateinit var broadcastReceiver2: BroadcastReceiver
+    private lateinit var mIntentFilter2: IntentFilter
 
     private lateinit var viewModel: FindDriverViewModel
 
@@ -79,7 +81,6 @@ class FindDriverActivity : AppCompatActivity() {
         })
 
     }
-
 
     private fun sendOrderOjek() {
         val prefs = PreferenceHelper.defaultPrefs(this)
@@ -145,18 +146,31 @@ class FindDriverActivity : AppCompatActivity() {
     private fun setupBroadcastReceiver() {
         broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent?) {
-                val intent = Intent(this@FindDriverActivity, DetailOrderActivity::class.java)
-                intent.putExtra("order_id", order_id)
-                intent.putExtra("pickup_lat", pickup_lat)
-                intent.putExtra("pickup_lng", pickup_lng)
-                intent.putExtra("destination_lat", destination_lat)
-                intent.putExtra("destination_lng", destination_lng)
-                startActivity(intent)
-                finish()
+                navigateToDetailPesanan()
             }
         }
 
         mIntentFilter = IntentFilter(Const.NOTIFICATION_DRIVER_FOUND)
+
+        //to start MainActivity when all driver reject order
+        broadcastReceiver2 = object : BroadcastReceiver() {
+            override fun onReceive(p0: Context?, p1: Intent?) {
+                navigateToMainActivity()
+            }
+        }
+        mIntentFilter2 = IntentFilter(Const.ORDER_CANCELLED)
+    }
+
+
+    private fun navigateToDetailPesanan() {
+        val intent = Intent(this@FindDriverActivity, DetailOrderActivity::class.java)
+        intent.putExtra("order_id", order_id)
+        intent.putExtra("pickup_lat", pickup_lat)
+        intent.putExtra("pickup_lng", pickup_lng)
+        intent.putExtra("destination_lat", destination_lat)
+        intent.putExtra("destination_lng", destination_lng)
+        startActivity(intent)
+        finish()
     }
 
 
@@ -182,6 +196,32 @@ class FindDriverActivity : AppCompatActivity() {
         })
     }
 
+
+    private fun getDetailOrder() {
+        val prefs = PreferenceHelper.defaultPrefs(this)
+        token = prefs["token", ""]
+        if(order_id != 0){
+            viewModel.getDetailOrder(token!!, order_id)
+        }
+        viewModel.detailOrder.observe(this, Observer {
+            when (it?.status) {
+                Status.SUCCESS -> {
+                    if(it.data != null){
+                        val order = it.data
+                        if(order.status == 6 || order.status == 7){
+                            navigateToMainActivity()
+                        }else if(order.status == 2){
+                            navigateToDetailPesanan()
+                        }
+                    }
+                }
+                Status.ERROR -> {
+                    this.showSnackbarInfo("" + it.message)
+                }
+            }
+        })
+    }
+
     override fun onBackPressed() {
         super.onBackPressed()
         navigateToMainActivity()
@@ -190,12 +230,15 @@ class FindDriverActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, mIntentFilter)
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver2, mIntentFilter2)
+        getDetailOrder()
     }
 
     override fun onPause() {
         try {
             if (broadcastReceiver != null) {
                 LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
+                LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver2)
             }
         } catch (e: Exception) {
 

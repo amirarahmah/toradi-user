@@ -55,7 +55,7 @@ class HistoryActivity : AppCompatActivity() {
             when (it?.status) {
                 Status.SUCCESS -> {
                     if (it.data != null) {
-                        val responseList = it.data
+                        val responseList = it.data.reversed()
 
                         listOrder.clear()
                         listOrder.addAll(responseList)

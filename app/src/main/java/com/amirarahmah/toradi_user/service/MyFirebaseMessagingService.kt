@@ -38,7 +38,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         if (status == "2") {
             sendBroadcastToFindDriverActivity()
-        }  else {
+        } else if(status == "7"){
+            sendBroadcastOrderCancelled()
+        } else {
             sendBroadcastToPesananDetail()
         }
 
@@ -58,6 +60,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             6 -> {
                 "Pesanan dibatalkan oleh Pengemudi"
             }
+            7 -> {
+                "Maaf pengemudi tidak ditemukan"
+            }
             else -> {
                 ""
             }
@@ -66,10 +71,15 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         sendNotification(id, status)
     }
 
-
     private fun sendBroadcastToFindDriverActivity() {
         val intent = Intent()
         intent.action = Const.NOTIFICATION_DRIVER_FOUND
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+    }
+
+    private fun sendBroadcastOrderCancelled() {
+        val intent = Intent()
+        intent.action = Const.ORDER_CANCELLED
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
     }
 

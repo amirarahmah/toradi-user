@@ -50,6 +50,8 @@ dependencies {
 
     //animation
     implementation 'com.skyfishjy.ripplebackground:library:1.0.1'
+    implementation 'com.daimajia.easing:library:2.0@aar'
+    implementation 'com.daimajia.androidanimations:library:2.3@aar'
 
     //snackbar and material component
     implementation 'com.github.matecode:Snacky:1.1.4'

@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -25,6 +26,10 @@ import com.amirarahmah.toradi_user.util.showSnackbarInfo
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.daimajia.androidanimations.library.Techniques
+import com.daimajia.androidanimations.library.YoYo
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
@@ -40,6 +45,7 @@ import java.util.*
 class HomeFragment : Fragment(), OnMapReadyCallback {
 
     private val LOCATION_PERMISSION_REQUEST_CODE = 1
+    private val REQUEST_CHECK_SETTINGS = 100
 
     /*Maps variable*/
     private var mMap: GoogleMap? = null
@@ -56,7 +62,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
     private var mFusedLocationProviderClient: FusedLocationProviderClient? = null
     private var mLocationCallback: LocationCallback? = null
-    private var mLocationRequest: LocationRequest? = null
+    private lateinit var mLocationRequest: LocationRequest
 
     private var polyline: Polyline? = null
     private var marker_pickup: Marker? = null
@@ -65,8 +71,11 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
     private var price = 0
     private var distance = 0.0
-    private var note = "-"
+    private var note : String? = ""
+    private var totalPassenger = "1"
     private var inputValid = false
+
+    val listDriverMarker = ArrayList<Marker>()
 
     private lateinit var viewModel: HomeViewModel
 
@@ -128,11 +137,62 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             e.printStackTrace()
         }
 
-        getDeviceLocation()
+        checkLocationSetting()
+        getNearbyDriver()
         setClick()
 
     }
 
+
+    private fun checkLocationSetting() {
+        mLocationRequest = LocationRequest()
+        mLocationRequest.interval = 10000
+        mLocationRequest.fastestInterval = 5000
+        mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+
+        val builder = LocationSettingsRequest.Builder()
+            .addLocationRequest(mLocationRequest)
+        builder.setAlwaysShow(true)
+
+        val task = LocationServices.getSettingsClient(context!!)
+            .checkLocationSettings(builder.build())
+
+        task.addOnCompleteListener { task ->
+            try {
+                // All location settings are satisfied. The client can initialize location
+                val response = task.getResult(ApiException::class.java)
+                getDeviceLocation()
+
+            } catch (exception: ApiException) {
+                when (exception.statusCode) {
+                    LocationSettingsStatusCodes.RESOLUTION_REQUIRED ->
+                        // Location settings are not satisfied. But could be fixed by showing the
+                        // user a dialog.
+                        try {
+                            // Cast to a resolvable exception.
+                            val resolvable = exception as ResolvableApiException
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            startIntentSenderForResult(resolvable.resolution.intentSender,
+                                REQUEST_CHECK_SETTINGS, null,0,0, 0,null)
+                        } catch (e: IntentSender.SendIntentException) {
+                            // Ignore the error.
+                        } catch (e: ClassCastException) {
+                            // Ignore, should be an impossible error.
+                        }
+
+                    LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> {
+                    }
+                }// Location settings are not satisfied. However, we have no way to fix the
+                // settings so we won't show the dialog.
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        getNearbyDriver()
+    }
 
     private fun setClick() {
 
@@ -144,20 +204,32 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
            showSearchLocationFragment(1)
         }
 
+        btn_passenger.setOnClickListener {
+            showPassengerFragment()
+        }
+
         btn_order.setOnClickListener {
-            if(inputValid){
-                val i = Intent(context, FindDriverActivity::class.java)
-                i.putExtra("pickup_lat", pickup_lat)
-                i.putExtra("pickup_lng", pickup_lng)
-                i.putExtra("pickup_address", pickup_address)
-                i.putExtra("destination_lat", destination_lat)
-                i.putExtra("destination_lng", destination_lng)
-                i.putExtra("destination_address", destination_address)
-                i.putExtra("note", note)
-                i.putExtra("passenger", 1)
-                i.putExtra("distance", distance)
-                i.putExtra("price", price)
-                startActivity(i)
+            if(note!!.isBlank()){
+                YoYo.with(Techniques.Shake)
+                    .duration(600)
+                    .repeat(0)
+                    .playOn(btn_passenger)
+                activity?.showSnackbarInfo("Mohon masukkan data penumpang")
+            }else{
+                if(inputValid){
+                    val i = Intent(context, FindDriverActivity::class.java)
+                    i.putExtra("pickup_lat", pickup_lat)
+                    i.putExtra("pickup_lng", pickup_lng)
+                    i.putExtra("pickup_address", pickup_address)
+                    i.putExtra("destination_lat", destination_lat)
+                    i.putExtra("destination_lng", destination_lng)
+                    i.putExtra("destination_address", destination_address)
+                    i.putExtra("note", note)
+                    i.putExtra("passenger", 1)
+                    i.putExtra("distance", distance)
+                    i.putExtra("price", price)
+                    startActivity(i)
+                }
             }
         }
     }
@@ -166,11 +238,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private fun getDeviceLocation() {
         mFusedLocationProviderClient = LocationServices
             .getFusedLocationProviderClient(activity?.applicationContext as Context)
-
-        mLocationRequest = LocationRequest()
-        mLocationRequest!!.interval = 10000
-        mLocationRequest!!.fastestInterval = 5000
-        mLocationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
 
         mLocationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
@@ -203,6 +270,54 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     }
 
 
+    private fun getNearbyDriver(){
+        if(listDriverMarker.size > 0){
+            for(marker in listDriverMarker){
+                marker.remove()
+            }
+
+            listDriverMarker.clear()
+        }
+
+        viewModel.getNeabyDriver()
+
+        viewModel.nearbyDriver.observe(this, androidx.lifecycle.Observer {
+            when(it.status){
+                Status.SUCCESS -> {
+                    if(it.data != null){
+                        val responseList = it.data
+
+                        if(responseList.isNotEmpty()){
+                            for(driver in responseList){
+                                val loc = LatLng(driver.latitude_now, driver.longitude_now)
+
+                                Log.d("NearbyDriver",
+                                    "lat driver : ${driver.latitude_now}, Lng driver : ${driver.longitude_now}")
+
+                                addDriverMarker(loc)
+
+                            }
+                        }
+                    }
+                }
+                Status.ERROR -> {
+                    activity?.showSnackbarInfo(""+it.message)
+                }
+            }
+        })
+    }
+
+
+    private fun addDriverMarker(loc: LatLng) {
+        val icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_driver)
+        val marker = mMap?.addMarker(MarkerOptions()
+            .position(loc)
+            .title("Driver")
+            .icon(icon))
+        listDriverMarker.add(marker!!)
+    }
+
+
     private fun showSearchLocationFragment(type: Int) {
         val searchLocationFragment = SearchLocationFragment
             .newInstance(type, latitude!!, longitude!!, pickup_address, destination_address)
@@ -213,6 +328,15 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         )
     }
 
+
+    private fun showPassengerFragment() {
+        val passengerFragment = PassengerFragment()
+        passengerFragment.setTargetFragment(this, 3)
+        passengerFragment.show(
+            activity!!.supportFragmentManager,
+            passengerFragment.tag
+        )
+    }
 
     private fun moveCamera(latitude: Double, longitude: Double) {
         val cameraUpdate = CameraUpdateFactory
@@ -278,7 +402,14 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 }
 
             }
-
+        }else if(requestCode == 3  && resultCode == Activity.RESULT_OK){
+            val bundle = data!!.extras
+            note = bundle!!.getString("condition")
+            totalPassenger = bundle.getString("total").toString()
+            tv_passanger.text = "$totalPassenger Penumpang"
+            atrs.visibility = View.GONE
+        }else if(requestCode == REQUEST_CHECK_SETTINGS && resultCode == Activity.RESULT_OK){
+            getDeviceLocation()
         }
     }
 
