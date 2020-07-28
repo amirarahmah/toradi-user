@@ -19,7 +19,7 @@ object PreferenceHelper {
     }
 
     /**
-     * puts a key value pair in shared prefs if doesn't exists, otherwise updates value on given [key]
+     * puts a key value pair in shared prefs if doesn'bottom_sheet_main exists, otherwise updates value on given [key]
      */
     operator fun SharedPreferences.set(key: String, value: Any?) {
         when (value) {

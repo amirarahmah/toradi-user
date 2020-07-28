@@ -17,6 +17,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -45,6 +46,12 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     implementation 'com.google.android.gms:play-services-places:17.0.0'
     implementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation 'com.google.maps.android:android-maps-utils:0.5'
+
+    //animation
+    implementation 'com.skyfishjy.ripplebackground:library:1.0.1'
+    implementation 'com.daimajia.easing:library:2.0@aar'
+    implementation 'com.daimajia.androidanimations:library:2.3@aar'
 
     //snackbar and material component
     implementation 'com.github.matecode:Snacky:1.1.4'
@@ -74,7 +81,7 @@ dependencies {
 
     //rxjava
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
-    implementation 'io.reactivex.rxjava2:rxjava:2.1.12'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.9'
     implementation 'io.reactivex.rxjava2:rxkotlin:2.2.0'
 
     //room persistence
@@ -87,5 +94,12 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
     kapt 'androidx.lifecycle:lifecycle-compiler:2.1.0'
 
+    implementation 'com.android.volley:volley:1.1.1'
+
+    //firebase
+    implementation 'com.google.firebase:firebase-analytics:17.2.1'
+    implementation 'com.google.firebase:firebase-messaging:20.0.1'
 
 }
+
+apply plugin: 'com.google.gms.google-services'

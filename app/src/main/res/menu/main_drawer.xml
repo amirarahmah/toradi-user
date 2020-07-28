@@ -2,8 +2,31 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_beranda"
-        android:title="@string/home"
         android:icon="@drawable/ic_home"
+        android:textColor="@color/grey"
+        android:title="@string/home" />
+    <item
+        android:id="@+id/nav_active"
+        android:title="@string/pesanan_aktif"
+        android:icon="@drawable/bookmark"
+        android:textColor="@color/grey"
+        />
+    <item
+        android:id="@+id/nav_riwayat"
+        android:title="@string/riwayat"
+        android:icon="@drawable/ic_history"
+        android:textColor="@color/grey"
+        />
+    <item
+        android:id="@+id/nav_setting"
+        android:title="@string/pengaturan"
+        android:icon="@drawable/ic_setting"
+        android:textColor="@color/grey"
+        />
+    <item
+        android:id="@+id/nav_logout"
+        android:title="@string/keluar"
+        android:icon="@drawable/ic_exit"
         android:textColor="@color/grey"
         />
 </menu>

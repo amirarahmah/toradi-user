@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">toradi-user</string>
+    <string name="app_name">Ojek Toradi</string>
     <string name="title_activity_main">Beranda</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -7,6 +7,8 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
+
+    <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
 
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
@@ -19,5 +21,67 @@
 
     <string name="permission_rationale_location">Access to the location service is required to demonstrate the \'my location\' feature, which shows your current location on the map.</string>
     <string name="location_permission_denied">This sample requires location permission to enable the \'my location\' layer. Please try again and grant access to use the location.</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="ingin_ke_mana_hari_ini">Ingin ke mana hari ini?</string>
+    <string name="cari_lokasi_tujuan">Cari lokasi tujuan</string>
+    <string name="lokasi_penjemputan">Lokasi penjemputan</string>
+    <string name="lokasi_tujuan">Lokasi tujuan</string>
+    <string name="pilih_lewat_peta">Pilih Lewat Peta</string>
+    <string name="pilih_lokasi_tujuan">Pilih Lokasi Tujuan</string>
+    <string name="pilih_lokasi_penjemputan">Pilih Lokasi Penjemputan</string>
+    <string name="pilih_lokasi">Pilih Lokasi</string>
+    <string name="loading_alamat">loading alamat...</string>
+    <string name="jumlah_penumpang">1 Penumpang</string>
+    <string name="tambah_catatan_untuk_pengemudi">Tambah catatan untuk pengemudi</string>
+    <string name="batalkan_pesanan">Batalkan Pesanan</string>
+    <string name="pesan_ojek">Pesan Ojek</string>
+    <string name="mencari_driver_terdekat">Mencari Driver Terdekat</string>
+    <string name="mohon_tunggu">Mohon Tunggu...</string>
+    <string name="kami_sedang_mencari_driver">Kami sedang mencari driver</string>
+    <string name="loading">loading</string>
+    <string name="riwayat">Riwayat</string>
+    <string name="status_pesanan">Status Pesanan</string>
+    <string name="harga">Harga</string>
+    <string name="jarak">Jarak</string>
+    <string name="sms">SMS</string>
+    <string name="telepon">Telepon</string>
+    <string name="berikan_penilaian">Berikan Penilaian</string>
+    <string name="penilaian_anda">Penilaian Anda</string>
+    <string name="password_anda">Password Anda</string>
+    <string name="ketik_ulang_password_anda">Ketik ulang password Anda</string>
+    <string name="password">Password</string>
+    <string name="ulangi_password">Ulangi Password</string>
+    <string name="email">Email</string>
+    <string name="cth_email">Cth: nama@gmail.com</string>
+    <string name="nama_lengkap">Nama Lengkap</string>
+    <string name="cth_nama">Cth: Nama</string>
+    <string name="register">Register</string>
+    <string name="login">Login</string>
+    <string name="ojek_toradi">Ojek\n Toradi</string>
+    <string name="bagaimana_perjalanan_anda">Bagaimana Perjalanan Anda?</string>
+    <string name="tuliskan_komentar_anda_disini">Tuliskan komentar Anda disini…</string>
+    <string name="kirim">Kirim</string>
+    <string name="nomor_telepon">Nomor Telepon</string>
+    <string name="cth_phone">Cth: 858585858</string>
+    <string name="keluar">Keluar</string>
+    <string name="pengaturan">Pengaturan</string>
+    <string name="driver_not_found">Pengemudi tidak ditemukan</string>
+    <string name="harga2">Harga:</string>
+    <string name="pesanan_aktif">Pesanan Aktif</string>
+    <string name="ubah">Ubah Profil</string>
+    <string name="whatsapp">Whatsapp</string>
+    <string name="data_penumpang">Data Penumpang</string>
+    <string name="simpan">Simpan</string>
+    <string name="kondisi">Kondisi</string>
+    <string name="membawa_kursi_roda">Membawa kursi roda?</string>
+    <string name="tidak">Tidak</string>
+    <string name="ya">Ya</string>
+    <string name="masukkan_data_penumpang">Masukkan Data Penumpang</string>
+    <string name="atrs">*</string>
+    <string name="satu">Satu</string>
+    <string name="dua">Dua</string>
+    <string name="jumlah_penumpang2">Jumlah Penumpang</string>
 
 </resources>
